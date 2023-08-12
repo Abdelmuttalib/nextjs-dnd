@@ -100,6 +100,7 @@ function Board() {
   const [tasks, setTasks] = useState<TTask[]>(
     initialTasks.sort((a, b) => a.orderIndex - b.orderIndex)
   );
+  // .sort((a, b) => a.orderIndex - b.orderIndex)
   const statuses = ["todo", "inProgress", "done"];
 
   function handleOnDragEnd(result: DropResult) {
@@ -110,7 +111,6 @@ function Board() {
     <div className="flex justify-center">
       <DragDropContext onDragEnd={handleOnDragEnd}>
         <div className="flex flex-col lg:flex-row gap-6 w-full min-h-[100svh]">
-          {JSON.stringify(tasks)}
           {/* Column/Status */}
           {statuses.map((status) => {
             const tasksByStatus = tasks.filter(
