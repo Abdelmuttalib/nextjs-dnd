@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center justify-between py-24 ${inter.className}`}
     >
       <Board />
     </main>
@@ -222,9 +222,9 @@ function Board() {
         />
       </Head>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center h-[100svh] w-screen px-4 sm:px-6 md:px-8 lg:px-10 max-w-[90rem]">
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <div className="flex flex-col lg:flex-row gap-6 w-full min-h-[100svh]">
+          <div className="flex flex-col md:flex-row gap-1 md:gap-6 w-full h-full">
             {/* Column/Status */}
             {statuses.map((status) => {
               const tasksByStatus = tasks.filter(
@@ -233,7 +233,7 @@ function Board() {
               return (
                 <div
                   key={status}
-                  className="w-full lg:w-[30rem] p-4 bg-gray-100/80 h-full"
+                  className="w-full lg:w-full p-4 bg-gray-100/80 h-[100svh]"
                 >
                   <h2 className="text-lg font-bold mb-4 pb-2 capitalize">
                     {status}{" "}
