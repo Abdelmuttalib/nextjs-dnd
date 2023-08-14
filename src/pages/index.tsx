@@ -96,6 +96,7 @@ const initialTasks: TTask[] = [
   },
 ];
 import { resetServerContext } from "react-beautiful-dnd";
+import Head from "next/head";
 
 function Board() {
   resetServerContext();
@@ -212,94 +213,104 @@ function Board() {
   }
 
   return (
-    <div className="flex justify-center">
-      <DragDropContext onDragEnd={handleOnDragEnd}>
-        <div className="flex flex-col lg:flex-row gap-6 w-full min-h-[100svh]">
-          {/* Column/Status */}
-          {statuses.map((status) => {
-            const tasksByStatus = tasks.filter(
-              (task) => task.status === status
-            );
-            return (
-              <div
-                key={status}
-                className="w-full lg:w-[30rem] p-4 bg-gray-100/80 h-full"
-              >
-                <h2 className="text-lg font-bold mb-4 pb-2 capitalize">
-                  {status}{" "}
-                  <span className="text-sm ml-2 p-1.5 rounded-full bg-white px-2.5">
-                    {tasksByStatus.length}
-                  </span>
-                </h2>
-                <Droppable droppableId={status}>
-                  {(provided, snapshot) => (
-                    <div
-                      className={`space-y-4 h-full rounded ${
-                        snapshot.isDraggingOver ? "bg-white" : ""
-                      }`}
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                    >
-                      {/* Tasks */}
-                      {tasksByStatus.map((task, index) => (
-                        <Draggable
-                          key={task.id.toString()}
-                          draggableId={task.id.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <div
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              ref={provided.innerRef}
-                              className="border rounded-lg p-4 mb-4 bg-white"
-                            >
-                              <h3 className="font-bold text-lg mb-2">
-                                {task.title}
-                              </h3>
-                              <p className="text-gray-700">
-                                {task.description}
-                              </p>
-                              <div className="flex justify-between items-center gap-2 mt-4">
-                                <div className="flex items-center">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    className="w-10 h-10 rounded-full mr-2 object-cover"
-                                    src={task.assigneeAvatarUrl}
-                                    alt="Assignee avatar"
-                                  />
-                                  <span className="text-gray-700">
-                                    {task.assigneeName}
+    <>
+      <Head>
+        <title>Nextjs Drag and Drop</title>
+        <meta
+          name="description"
+          content="ReactNextjs Drag and Drop with functionality"
+        />
+      </Head>
+
+      <div className="flex justify-center">
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <div className="flex flex-col lg:flex-row gap-6 w-full min-h-[100svh]">
+            {/* Column/Status */}
+            {statuses.map((status) => {
+              const tasksByStatus = tasks.filter(
+                (task) => task.status === status
+              );
+              return (
+                <div
+                  key={status}
+                  className="w-full lg:w-[30rem] p-4 bg-gray-100/80 h-full"
+                >
+                  <h2 className="text-lg font-bold mb-4 pb-2 capitalize">
+                    {status}{" "}
+                    <span className="text-sm ml-2 p-1.5 rounded-full bg-white px-2.5">
+                      {tasksByStatus.length}
+                    </span>
+                  </h2>
+                  <Droppable droppableId={status}>
+                    {(provided, snapshot) => (
+                      <div
+                        className={`space-y-4 h-full rounded ${
+                          snapshot.isDraggingOver ? "bg-white" : ""
+                        }`}
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {/* Tasks */}
+                        {tasksByStatus.map((task, index) => (
+                          <Draggable
+                            key={task.id.toString()}
+                            draggableId={task.id.toString()}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                ref={provided.innerRef}
+                                className="border rounded-lg p-4 mb-4 bg-white"
+                              >
+                                <h3 className="font-bold text-lg mb-2">
+                                  {task.title}
+                                </h3>
+                                <p className="text-gray-700">
+                                  {task.description}
+                                </p>
+                                <div className="flex justify-between items-center gap-2 mt-4">
+                                  <div className="flex items-center">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      className="w-10 h-10 rounded-full mr-2 object-cover"
+                                      src={task.assigneeAvatarUrl}
+                                      alt="Assignee avatar"
+                                    />
+                                    <span className="text-gray-700">
+                                      {task.assigneeName}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`px-2 py-1 rounded-full font-semibold text-sm ${
+                                      task.status === "done" &&
+                                      "bg-green-100 text-green-800"
+                                    } ${
+                                      task.status === "inProgress" &&
+                                      "bg-yellow-100 text-yellow-600"
+                                    } ${
+                                      task.status === "todo" &&
+                                      "bg-blue-100 text-blue-800"
+                                    }`}
+                                  >
+                                    {task.status}
                                   </span>
                                 </div>
-                                <span
-                                  className={`px-2 py-1 rounded-full font-semibold text-sm ${
-                                    task.status === "done" &&
-                                    "bg-green-100 text-green-800"
-                                  } ${
-                                    task.status === "inProgress" &&
-                                    "bg-yellow-100 text-yellow-600"
-                                  } ${
-                                    task.status === "todo" &&
-                                    "bg-blue-100 text-blue-800"
-                                  }`}
-                                >
-                                  {task.status}
-                                </span>
                               </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
-        </div>
-      </DragDropContext>
-    </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </div>
+              );
+            })}
+          </div>
+        </DragDropContext>
+      </div>
+    </>
   );
 }
