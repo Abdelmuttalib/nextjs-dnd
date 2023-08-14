@@ -20,13 +20,15 @@ export default function Home() {
   );
 }
 
+type Status = "todo" | "inProgress" | "done";
+
 interface TTask {
   id: string;
   title: string;
   description: string;
   assigneeName: string;
   assigneeAvatarUrl: string;
-  status: "todo" | "inProgress" | "done";
+  status: Status;
   orderIndex: number;
 }
 
@@ -104,7 +106,109 @@ function Board() {
   const statuses = ["todo", "inProgress", "done"];
 
   function handleOnDragEnd(result: DropResult) {
-    console.log("result", result);
+    const { source, destination, draggableId: taskId } = result;
+
+    if (!destination) return;
+
+    // If the draggable is dropped outside of a droppable
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return;
+
+    const sourceStatus = source.droppableId;
+    const destinationStatus = destination.droppableId;
+
+    // Find the task being dragged
+    const draggedTask = tasks.find((task) => task.id.toString() === taskId);
+
+    if (!draggedTask) return;
+
+    // Remove the dragged task from the tasks array
+    const tasksWithoutDragged = tasks.filter(
+      (task) => task.id.toString() !== taskId
+    );
+
+    // Insert the dragged task at the appropriate index in the destination column
+    const updatedTasks = [...tasksWithoutDragged];
+    const destinationTasks = updatedTasks.filter(
+      (task) => task.status === destinationStatus
+    );
+    const sourceTasks = updatedTasks.filter(
+      (task) => task.status === sourceStatus
+    );
+    const otherTasks = updatedTasks.filter(
+      (task) =>
+        task.status !== destinationStatus && task.status !== sourceStatus
+    );
+
+    if (destinationTasks.length === 0) {
+      setTasks([
+        ...sourceTasks,
+        {
+          ...draggedTask,
+          status: destinationStatus as Status,
+          orderIndex: destination.index || 0,
+        },
+        ...otherTasks,
+      ]);
+      return;
+    }
+
+    // If the task is dropped in the same column/status
+    if (sourceStatus === destinationStatus) {
+      destinationTasks.splice(destination.index, 0, {
+        ...draggedTask,
+        orderIndex: destination.index,
+      });
+
+      // Update the order indices for tasks in the same column
+      destinationTasks
+        .filter((task) => task.status === destinationStatus)
+        .forEach((task, index) => {
+          task.orderIndex = index;
+        });
+
+      setTasks([...destinationTasks, ...otherTasks]);
+
+      return;
+    }
+    // if the task is dropped in a different column/status
+    else if (sourceStatus !== destinationStatus) {
+      const finalDestinationTasks: TTask[] = [];
+
+      destinationTasks.forEach((task, index) => {
+        if (index === destination.index) {
+          finalDestinationTasks.push({
+            ...draggedTask,
+            status: destinationStatus as Status,
+            orderIndex: destination.index,
+          });
+          finalDestinationTasks.push({
+            ...task,
+            orderIndex: destination.index + 1,
+          });
+        } else if (index !== destination.index) {
+          finalDestinationTasks.push({
+            ...task,
+            orderIndex: index > destination.index ? index + 1 : index,
+          });
+        }
+      });
+
+      // if the task is dropped at the end of the column
+      if (destinationTasks.length === destination.index) {
+        finalDestinationTasks.push({
+          ...draggedTask,
+          status: destinationStatus as Status,
+          orderIndex: destination.index,
+        });
+      }
+
+      setTasks([...sourceTasks, ...finalDestinationTasks, ...otherTasks]);
+      return;
+    }
   }
 
   return (
@@ -119,13 +223,20 @@ function Board() {
             return (
               <div
                 key={status}
-                className="w-full lg:w-1/3 p-4 bg-gray-100/80 h-full"
+                className="w-full lg:w-[30rem] p-4 bg-gray-100/80 h-full"
               >
-                <h2 className="text-lg font-bold mb-4">{status}</h2>
+                <h2 className="text-lg font-bold mb-4 pb-2 capitalize">
+                  {status}{" "}
+                  <span className="text-sm ml-2 p-1.5 rounded-full bg-white px-2.5">
+                    {tasksByStatus.length}
+                  </span>
+                </h2>
                 <Droppable droppableId={status}>
-                  {(provided) => (
+                  {(provided, snapshot) => (
                     <div
-                      className="space-y-4"
+                      className={`space-y-4 h-full rounded ${
+                        snapshot.isDraggingOver ? "bg-white" : ""
+                      }`}
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                     >
@@ -162,10 +273,15 @@ function Board() {
                                   </span>
                                 </div>
                                 <span
-                                  className={`px-2 py-1 rounded-full font-bold text-sm ${
-                                    task.status === "done"
-                                      ? "bg-green-500 text-white"
-                                      : "bg-gray-300 text-gray-700"
+                                  className={`px-2 py-1 rounded-full font-semibold text-sm ${
+                                    task.status === "done" &&
+                                    "bg-green-100 text-green-800"
+                                  } ${
+                                    task.status === "inProgress" &&
+                                    "bg-yellow-100 text-yellow-600"
+                                  } ${
+                                    task.status === "todo" &&
+                                    "bg-blue-100 text-blue-800"
                                   }`}
                                 >
                                   {task.status}
